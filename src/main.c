@@ -10,14 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <sys/types.h>
-#include <dirent.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include "libft.h"
-
-#include <stdio.h>
-
+#include "ft_ls.h"
 
 typedef	struct		s_ls
 {
@@ -89,7 +82,7 @@ char	**ft_parse_flags(char **argv)
 
 		i++;
 	}
-	result[k] == NULL;
+	result[k] = NULL;
 
 	return (result);
 }
@@ -198,9 +191,9 @@ void	ft_init(t_ft_ls *ls, char **argv)
 	ls->contents = NULL;
 }
 
-void	ft_start(t_ft_ls *ls)
+t_ft_ls *ft_start(t_ft_ls *ls)
 {
-	return;
+	return ls;
 }
 
 void	ft_simple(t_ft_ls *ls)

@@ -1,32 +1,4 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: tobi <andrei.pavalachi@hotmail.com>        +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/12/20 00:03:34 by tobi              #+#    #+#             */
-/*   Updated: 2020/12/20 02:18:13 by tobi             ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "ft_ls.h"
-
-typedef	struct		s_ls
-{
-	struct	dirent	f_info;
-	char			*path;
-	struct	s_ls	*content;
-	struct	s_ls	*next;
-
-}					t_ls;
-
-typedef struct		s_ft_ls
-{
-	char			**flags;
-	char			**w_dirs;
-	t_ls			*contents;
-}					t_ft_ls;
 
 int		ft_count_flags(char **argv)
 {

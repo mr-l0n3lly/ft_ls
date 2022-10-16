@@ -1,62 +1,53 @@
 #include "ft_ls.h"
 
-int		ft_count_flags(char **argv)
+t_ls_flag   ft_parse_flags(char **argv, int argc)
 {
-	int		flags;
-	int		i;
-
-	i = 1;
-	flags = 0;
-	while(argv[i])
-	{
-		if((int)ft_strlen(argv[i]) >= 2)
-		{
-			if(argv[i][0] == '-' && argv[i][1] == '-')
-				break;
-			else if(argv[i][0] == '-')
-				flags++;
-		}
-
-		i++;
-	}
-
-	return (flags);
-}
-
-char	**ft_parse_flags(char **argv)
-{
-	char			**result;
-	int				count;
+    t_ls_flag       ls_flag;
 	int				i;
-	int				k;
 
-	count = ft_count_flags(argv);
-	result = (char**)malloc(sizeof(char*) * count + 1);
+    ls_flag.R = 0;
+    ls_flag.a = 0;
+    ls_flag.l = 0;
+    ls_flag.r = 0;
+    ls_flag.t = 0;
+    ls_flag.dash = 0;
 
 	i = 1;
-	k = 0;
-	while(argv[i])
+	while(i < argc)
 	{
-		if((int)ft_strlen(argv[i]) >= 2)
-		{
-			if(argv[i][0] == '-' && argv[i][1] == '-')
-			{
-				break;
-			}
-		}
+		if (argv[i][0] == '-' && strlen(argv[i]) >= 2)
+        {
+            if (argv[i][1] == 'l')
+            {
+                ls_flag.l = 1;
+            }
 
-		if(argv[i][0] == '-')
-		{
-			result[k] = ft_strnew((int)ft_strlen(argv[i]));
-			result[k] = ft_strsub(argv[i], 0, ft_strlen(argv[i]));
-			k++;
-		}
+            if (argv[i][1] == 'a')
+            {
+                ls_flag.a = 1;
+            }
+
+            if (argv[i][1] == 'R')
+            {
+                ls_flag.R = 1;
+            }
+
+            if (argv[i][1] == 't')
+            {
+                ls_flag.t = 1;
+            }
+
+            if (argv[i][1] == '-')
+            {
+                ls_flag.dash = 1;
+                break;
+            }
+        }
 
 		i++;
 	}
-	result[k] = NULL;
 
-	return (result);
+	return (ls_flag);
 }
 
 int		ft_count_dirs(char **argv)
@@ -121,6 +112,7 @@ char	**ft_parse_dirs(char **argv)
 	i = 1;
 	k = 0;
 	special = 0;
+
 	while(argv[i])
 	{
 		if((int)ft_strlen(argv[i]) >= 2)
@@ -151,56 +143,174 @@ char	**ft_parse_dirs(char **argv)
 
 		i++;
 	}
+
 	result[k] = NULL;
 
 	return (result);
 }
 
-void	ft_init(t_ft_ls *ls, char **argv)
+void	ft_init(t_ft_ls *ls, char **argv, int argc)
 {
-	ls->flags = ft_parse_flags(argv);
-	ls->w_dirs = ft_parse_dirs(argv);
-	ls->contents = NULL;
+    ls->flags = ft_parse_flags(argv, argc);
+    ls->w_dirs = ft_parse_dirs(argv);
+    ls->content_dict = NULL;
 }
 
-t_ft_ls *ft_start(t_ft_ls *ls)
+t_ls *ft_ls_content_new(char *key, t_ls *content)
 {
+    t_ls *fresh;
+
+    fresh = (t_ls*)malloc(sizeof(t_ls));
+
+    if (fresh == NULL)
+        return (NULL);
+
+    if (content == NULL)
+    {
+        fresh->content = NULL;
+    }
+    else
+    {
+        fresh->content = content;
+    }
+
+    fresh->key = key;
+//    fresh->props = props;
+    fresh->next = NULL;
+
+    return (fresh);
+}
+
+t_ls *ft_ls_content_add(t_ls *head, t_ls new)
+{
+    if (head == NULL)
+    {
+        head = ft_ls_content_new(new.key, new.content);
+    }
+
+    t_ls *tmp_head = head;
+    t_ls *new_item = (t_ls*)malloc(sizeof(t_ls));
+
+    new_item->key = new.key;
+    new_item->content = new.content;
+//    new_item->props = new.props;
+    new_item->next = new.next;
+
+    while (tmp_head->next)
+    {
+        tmp_head = tmp_head->next;
+    }
+
+    tmp_head->next = new_item;
+
+    return head;
+}
+
+
+t_ls *ft_ls_dir(char *dir, t_ft_ls *ls)
+{
+    DIR	*dir_p = opendir(dir);
+    struct dirent *dirent_p;
+    t_ls *content;
+    t_ls tmp;
+
+    content = NULL;
+
+    while ((dirent_p = readdir(dir_p)) != NULL)
+    {
+        if (ls->flags.a == 0 && dirent_p->d_name[0] == '.')
+            continue;
+
+        if (content == NULL)
+        {
+            content = ft_ls_content_new(dirent_p->d_name, NULL);
+        }
+        else
+        {
+            tmp.key = dirent_p->d_name;
+            tmp.next = NULL;
+            tmp.content = NULL;
+            content = ft_ls_content_add(content, tmp);
+        }
+
+        ft_putstr(dirent_p->d_name);
+        ft_putstr("\n");
+    }
+
+
+    return content;
+}
+
+t_ls *ft_ls_dir_content(t_ls *content_dict, t_ft_ls *ls)
+{
+    int i;
+    t_ls *result = NULL;
+
+    i = 0;
+
+    while (content_dict)
+    {
+        if (i == 0)
+        {
+            result = ft_ls_content_new(content_dict->key, NULL);
+            i++;
+        }
+
+        result[i].key = content_dict->key;
+//        result[i].props = ft_ls_dir(content_dict->key);
+        result[i].content = ft_ls_dir(content_dict->key, ls);
+
+        content_dict = content_dict->next;
+    }
+
+    return (result);
+}
+
+t_ft_ls *ft_ls(t_ft_ls *ls)
+{
+    int i;
+    t_ls tmp;
+
+    i = 0;
+
+    while(ls->w_dirs[i] != NULL)
+    {
+        tmp.key = ls->w_dirs[i];
+//        tmp.props = ft_ls_dir(ls->w_dirs[i]);
+        tmp.content = ft_ls_dir(ls->w_dirs[i], ls);
+        tmp.next = NULL;
+
+        ls->content_dict = ft_ls_content_add(ls->content_dict, tmp);
+
+        i++;
+    }
+
 	return ls;
 }
 
-void	ft_simple(t_ft_ls *ls)
-{
-	ls->flags = NULL;
-
-	ls->w_dirs = (char**)malloc(sizeof(char*) * 2);
-	ls->w_dirs[0] = ".";
-	ls->w_dirs[1] = NULL;
-	ls->contents = NULL;
-}
 
 int		main(int argc, char **argv)
 {
 	t_ft_ls	ls;
 
-	if (argc > 1)
-	{
-		ft_init(&ls, argv);
-	}
-	else
-	{
-		ft_simple(&ls);
-	}
+    ft_init(&ls, argv, argc);
+	ft_ls(&ls);
 
-	ft_start(&ls);
-	
-	//DIR	*dirp = opendir(argv[1]);
-	//struct dirent *dirc;
-
-	//while ((dirc = readdir(dirp)) != NULL)
-	//{
-	//	ft_putstr(dirc->d_name);
-	//	ft_putstr("\n");
-	//}
+//    printf("Flags:\n");
+//    printf("l %d\n", ls.flags.l);
+//    printf("a %d\n", ls.flags.a);
+//    printf("R %d\n", ls.flags.R);
+//    printf("t %d\n", ls.flags.t);
+//    printf("r %d\n", ls.flags.r);
+//    printf("- %d\n", ls.flags.dash);
+//    printf("Dirs: \n");
+//
+//    while(*ls.w_dirs)
+//    {
+//        ft_printf("dir - %s\n", *ls.w_dirs);
+//
+//        ls.w_dirs = ls.w_dirs + 1;
+//    }
 
 	return (0);
 }

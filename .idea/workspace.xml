@@ -99,7 +99,8 @@
     &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
     &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/apavalac/Documents/academy/ft_ls&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
   }
 }</component>
   <component name="RecentsManager">
@@ -179,7 +180,9 @@
       <workItem from="1664252650586" duration="186000" />
       <workItem from="1665843004352" duration="673000" />
       <workItem from="1665844690115" duration="897000" />
-      <workItem from="1665876303294" duration="13709000" />
+      <workItem from="1665876303294" duration="14131000" />
+      <workItem from="1666361960302" duration="72000" />
+      <workItem from="1666362038246" duration="4759000" />
     </task>
     <servers />
   </component>

@@ -7,6 +7,7 @@
 
 /* Outside inc files */
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <dirent.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -52,6 +53,7 @@ t_ls_flag   ft_parse_flags(char **argv, int argc);
 int         ft_count_dirs(char **argv);
 char        **ft_parse_dirs(char **argv);
 void        ft_init(t_ft_ls *ls, char **argv, int argc);
+int         is_directory(const char *path);
 t_ft_ls     *ft_ls(t_ft_ls *ls);
 
 #endif //FT_LS_H

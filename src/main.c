@@ -206,31 +206,44 @@ t_ls *ft_ls_content_add(t_ls *head, t_ls new)
     return head;
 }
 
+int is_directory(const char *path)
+{
+    struct stat path_stat;
+    stat(path, &path_stat);
+
+    return S_ISDIR(path_stat.st_mode);
+}
+
 
 t_ls *ft_ls_dir(char *dir, t_ft_ls *ls)
 {
     DIR	*dir_p = opendir(dir);
     struct dirent *dirent_p;
-    t_ls *content;
+    t_ls *current;
     t_ls tmp;
 
-    content = NULL;
+    current = NULL;
 
     while ((dirent_p = readdir(dir_p)) != NULL)
     {
         if (ls->flags.a == 0 && dirent_p->d_name[0] == '.')
             continue;
 
-        if (content == NULL)
+        if (current == NULL)
         {
-            content = ft_ls_content_new(dirent_p->d_name, NULL);
+            current = ft_ls_content_new(dirent_p->d_name, NULL);
         }
         else
         {
             tmp.key = dirent_p->d_name;
             tmp.next = NULL;
             tmp.content = NULL;
-            content = ft_ls_content_add(content, tmp);
+            current = ft_ls_content_add(current, tmp);
+        }
+
+        if (is_directory(dirent_p->d_name) && ls->flags.R == 1 && ft_strcmp(dirent_p->d_name, ".") != 0 && ft_strcmp(dirent_p->d_name, "..") != 0)
+        {
+            current->content = ft_ls_dir(ft_strjoin(dir, ft_strjoin("/", dirent_p->d_name)), ls);
         }
 
         ft_putstr(dirent_p->d_name);
@@ -238,7 +251,7 @@ t_ls *ft_ls_dir(char *dir, t_ft_ls *ls)
     }
 
 
-    return content;
+    return current;
 }
 
 t_ls *ft_ls_dir_content(t_ls *content_dict, t_ft_ls *ls)
